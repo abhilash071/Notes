@@ -1,24 +1,25 @@
 const express = require('express');
 const router = express.Router();
 const Note = require('../models/Note');
+const auth = require('../middleware/auth');
 
-// Public - Get all notes
-router.get('/', async (req, res) => {
-  const notes = await Note.find();
+// Get all notes for authenticated user
+router.get('/', auth, async (req, res) => {
+  const notes = await Note.find({ userId: req.user });
   res.json(notes);
 });
 
-// Public - Add a note
-router.post('/', async (req, res) => {
+// Create a new note
+router.post('/', auth, async (req, res) => {
   const { title, content } = req.body;
-  const newNote = new Note({ title, content });
-  await newNote.save();
-  res.json(newNote);
+  const note = new Note({ title, content, userId: req.user });
+  await note.save();
+  res.json(note);
 });
 
-// Public - Delete a note
-router.delete('/:id', async (req, res) => {
-  await Note.findByIdAndDelete(req.params.id);
+// Delete a note
+router.delete('/:id', auth, async (req, res) => {
+  await Note.findOneAndDelete({ _id: req.params.id, userId: req.user });
   res.json({ message: 'Note deleted' });
 });
 
