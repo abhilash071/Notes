@@ -8,6 +8,9 @@ router.get('/', auth, async (req, res) => {
   const notes = await Note.find({ userId: req.user });
   res.json(notes);
 });
+useEffect(() => {
+  localStorage.setItem('token', 'YOUR_VALID_JWT_HERE'); // Replace soon!
+}, []);
 
 // Create a new note
 router.post('/', auth, async (req, res) => {
@@ -24,3 +27,5 @@ router.delete('/:id', auth, async (req, res) => {
 });
 
 module.exports = router;
+
+
