@@ -1,6 +1,5 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Login from "@/pages/Login";
-import Register from "@/pages/Register";
+// src/App.jsx
+import Dashboard from "@/pages/Dashboard";
 
 function App() {
   return (
@@ -8,10 +7,9 @@ function App() {
       <Routes>
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
-        {/* Dashboard will come in next steps */}
+        <Route path="/dashboard" element={<Dashboard />} />
       </Routes>
     </Router>
   );
 }
 
-export default App;
