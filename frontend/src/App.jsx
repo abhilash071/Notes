@@ -1,19 +1,17 @@
-import React from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
-import Login from './components/Login';
-import Register from './components/Register';
-import NotesDashboard from './components/NotesDashboard';
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Login from "@/pages/Login";
+import Register from "@/pages/Register";
 
-const App = () => {
-  const token = localStorage.getItem('token');
-
+function App() {
   return (
-    <Routes>
-      <Route path="/" element={token ? <NotesDashboard /> : <Navigate to="/login" />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
-    </Routes>
+    <Router>
+      <Routes>
+        <Route path="/register" element={<Register />} />
+        <Route path="/login" element={<Login />} />
+        {/* Dashboard will come in next steps */}
+      </Routes>
+    </Router>
   );
-};
+}
 
 export default App;
