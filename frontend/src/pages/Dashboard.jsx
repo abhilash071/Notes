@@ -188,6 +188,8 @@
 // }
 import { useEffect, useState } from 'react'
 import axios from 'axios'
+import FilterDropdown from "@/components/FilterDropdown";
+
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -318,5 +320,22 @@ export default function Dashboard() {
     </div>
   )
 }
+{/* <div className="max-w-4xl mx-auto mt-6 px-4">
+<div className="flex justify-between items-center mb-4">
+  <h1 className="text-2xl font-bold">Your Notes</h1>
+  <FilterDropdown notes={notes} selectedTag={tag} onChange={setTag} />
+</div>
 
+<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+  {filtered.map(note => (
+    <div key={note._id} className="p-4 rounded-2xl shadow bg-white">
+      <h2 className="text-xl font-semibold">{note.title}</h2>
+      <p className="text-sm text-gray-600 mt-1">{note.tag}</p>
+      <p className="mt-2">{note.content}</p>
+    </div>
+  ))}
+</div>
+</div>
+);
+} */}
 
