@@ -188,54 +188,58 @@
 // }
 import { useEffect, useState } from 'react'
 import axios from 'axios'
-import { toast } from 'sonner'
-import { useNavigate } from 'react-router-dom'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
 
 export default function Dashboard() {
   const [notes, setNotes] = useState([])
-  const [newNote, setNewNote] = useState('')
-  const navigate = useNavigate()
+  const [title, setTitle] = useState('')
+  const [content, setContent] = useState('')
+  const [loading, setLoading] = useState(false)
+
+  const token = localStorage.getItem('token')
 
   const fetchNotes = async () => {
     try {
-      const res = await axios.get('/api/notes', {
-        headers: { Authorization: localStorage.getItem('token') }
+      const res = await axios.get('http://localhost:5000/api/notes', {
+        headers: { Authorization: `Bearer ${token}` }
       })
       setNotes(res.data)
     } catch (err) {
-      toast.error('Failed to load notes')
+      console.error('Error fetching notes:', err)
     }
   }
 
-  const handleAdd = async () => {
+  const handleCreateNote = async () => {
     try {
-      const res = await axios.post('/api/notes', { content: newNote }, {
-        headers: { Authorization: localStorage.getItem('token') }
-      })
-      setNotes([...notes, res.data])
-      setNewNote('')
-      toast.success('Note added')
+      if (!title || !content) return
+      setLoading(true)
+      await axios.post(
+        'http://localhost:5000/api/notes',
+        { title, content },
+        { headers: { Authorization: `Bearer ${token}` } }
+      )
+      setTitle('')
+      setContent('')
+      fetchNotes()
     } catch (err) {
-      toast.error('Failed to add note')
+      console.error('Error creating note:', err)
+    } finally {
+      setLoading(false)
     }
   }
 
-  const handleDelete = async (id) => {
+  const handleDeleteNote = async (id) => {
     try {
-      await axios.delete(`/api/notes/${id}`, {
-        headers: { Authorization: localStorage.getItem('token') }
+      await axios.delete(`http://localhost:5000/api/notes/${id}`, {
+        headers: { Authorization: `Bearer ${token}` }
       })
-      setNotes(notes.filter(n => n._id !== id))
-      toast.success('Note deleted')
+      fetchNotes()
     } catch (err) {
-      toast.error('Delete failed')
+      console.error('Error deleting note:', err)
     }
-  }
-
-  const handleLogout = () => {
-    localStorage.removeItem('token')
-    toast.info('Logged out')
-    navigate('/')
   }
 
   useEffect(() => {
@@ -243,30 +247,43 @@ export default function Dashboard() {
   }, [])
 
   return (
-    <div className="p-6 max-w-3xl mx-auto space-y-4">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Dashboard</h1>
-        <button onClick={handleLogout} className="bg-gray-200 px-4 py-1 rounded-xl hover:bg-gray-300">Logout</button>
-      </div>
+    <div className="max-w-2xl mx-auto p-4">
+      <h1 className="text-2xl font-bold mb-4">Dashboard</h1>
 
-      <div className="flex gap-2">
-        <input
-          value={newNote}
-          onChange={e => setNewNote(e.target.value)}
-          placeholder="Enter a note..."
-          className="flex-1 p-2 border rounded-xl"
+      <div className="bg-white p-4 rounded-2xl shadow mb-6 space-y-2">
+        <Input
+          placeholder="Note title"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
         />
-        <button onClick={handleAdd} className="bg-blue-600 text-white px-4 py-2 rounded-xl hover:bg-blue-700">Add</button>
+        <Textarea
+          placeholder="Note content"
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+        />
+        <Button onClick={handleCreateNote} disabled={loading}>
+          {loading ? 'Saving...' : 'Add Note'}
+        </Button>
       </div>
 
-      <ul className="space-y-2">
-        {notes.map(note => (
-          <li key={note._id} className="p-3 bg-white shadow rounded-xl flex justify-between items-center">
-            <span>{note.content}</span>
-            <button onClick={() => handleDelete(note._id)} className="text-red-500 hover:underline">Delete</button>
-          </li>
+      <div className="space-y-4">
+        {notes.map((note) => (
+          <Card key={note._id}>
+            <CardContent className="p-4">
+              <div className="flex justify-between items-start">
+                <div>
+                  <h2 className="text-lg font-semibold">{note.title}</h2>
+                  <p className="text-gray-600">{note.content}</p>
+                </div>
+                <Button variant="destructive" size="sm" onClick={() => handleDeleteNote(note._id)}>
+                  Delete
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         ))}
-      </ul>
+      </div>
     </div>
   )
 }
+
