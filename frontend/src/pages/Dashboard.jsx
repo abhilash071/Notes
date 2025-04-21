@@ -197,7 +197,9 @@ export default function Dashboard() {
   const [notes, setNotes] = useState([])
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
+  const [editingNoteId, setEditingNoteId] = useState(null)
   const [loading, setLoading] = useState(false)
+  const [tag, setTag] = useState('')
 
   const token = localStorage.getItem('token')
 
@@ -212,23 +214,42 @@ export default function Dashboard() {
     }
   }
 
-  const handleCreateNote = async () => {
+  const handleCreateOrUpdate = async () => {
     try {
       if (!title || !content) return
       setLoading(true)
-      await axios.post(
-        'http://localhost:5000/api/notes',
-        { title, content },
-        { headers: { Authorization: `Bearer ${token}` } }
-      )
+
+      if (editingNoteId) {
+        await axios.put(
+          `http://localhost:5000/api/notes/${editingNoteId}`,
+          { title, content, tag },
+          { headers: { Authorization: `Bearer ${token}` } }
+        )
+      } else {
+        await axios.post(
+          'http://localhost:5000/api/notes',
+          { title, content, tag },
+          { headers: { Authorization: `Bearer ${token}` } }
+        )
+      }
+
       setTitle('')
       setContent('')
+      setTag('')
+      setEditingNoteId(null)
       fetchNotes()
     } catch (err) {
-      console.error('Error creating note:', err)
+      console.error('Error saving note:', err)
     } finally {
       setLoading(false)
     }
+  }
+
+  const handleEditNote = (note) => {
+    setEditingNoteId(note._id)
+    setTitle(note.title)
+    setContent(note.content)
+    setTag(note.tag || '')
   }
 
   const handleDeleteNote = async (id) => {
@@ -261,8 +282,13 @@ export default function Dashboard() {
           value={content}
           onChange={(e) => setContent(e.target.value)}
         />
-        <Button onClick={handleCreateNote} disabled={loading}>
-          {loading ? 'Saving...' : 'Add Note'}
+        <Input
+          placeholder="Tag (optional)"
+          value={tag}
+          onChange={(e) => setTag(e.target.value)}
+        />
+        <Button onClick={handleCreateOrUpdate} disabled={loading}>
+          {editingNoteId ? 'Update Note' : 'Add Note'}
         </Button>
       </div>
 
@@ -273,11 +299,17 @@ export default function Dashboard() {
               <div className="flex justify-between items-start">
                 <div>
                   <h2 className="text-lg font-semibold">{note.title}</h2>
-                  <p className="text-gray-600">{note.content}</p>
+                  <p className="text-gray-600 mb-1">{note.content}</p>
+                  {note.tag && <span className="text-xs bg-gray-200 rounded px-2 py-1">{note.tag}</span>}
                 </div>
-                <Button variant="destructive" size="sm" onClick={() => handleDeleteNote(note._id)}>
-                  Delete
-                </Button>
+                <div className="flex flex-col gap-2">
+                  <Button variant="secondary" size="sm" onClick={() => handleEditNote(note)}>
+                    Edit
+                  </Button>
+                  <Button variant="destructive" size="sm" onClick={() => handleDeleteNote(note._id)}>
+                    Delete
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -286,4 +318,5 @@ export default function Dashboard() {
     </div>
   )
 }
+
 
