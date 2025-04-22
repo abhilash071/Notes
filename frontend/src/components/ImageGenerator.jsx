@@ -1,5 +1,7 @@
 // /frontend/components/src/ImageGenerator.jsx
 
+// /frontend/components/ImageGenerator.jsx
+
 import { useState } from 'react'
 import axios from 'axios'
 import { Input } from '@/components/ui/input'
@@ -19,6 +21,8 @@ export default function ImageGenerator() {
   const [style, setStyle] = useState('anime')
   const [loading, setLoading] = useState(false)
   const [imageUrl, setImageUrl] = useState('')
+  const [videoUrl, setVideoUrl] = useState('')
+  const [videoLoading, setVideoLoading] = useState(false)
 
   const handleGenerate = async () => {
     if (!prompt) return
@@ -33,10 +37,23 @@ export default function ImageGenerator() {
     }
   }
 
+  const handleVideoGenerate = async () => {
+    if (!imageUrl || !prompt) return
+    setVideoLoading(true)
+    try {
+      const res = await axios.post('http://localhost:5000/api/video/generate', { prompt, image: imageUrl })
+      setVideoUrl(res.data.video)
+    } catch (err) {
+      console.error('Error generating video:', err)
+    } finally {
+      setVideoLoading(false)
+    }
+  }
+
   return (
     <Card className="mt-6">
       <CardContent className="p-4 space-y-4">
-        <h2 className="text-lg font-bold">AI Image Generator</h2>
+        <h2 className="text-lg font-bold">AI Image & Video Generator</h2>
 
         <div className="space-y-2">
           <Label>Prompt</Label>
@@ -56,12 +73,24 @@ export default function ImageGenerator() {
         </div>
 
         <Button onClick={handleGenerate} disabled={loading}>
-          {loading ? 'Generating...' : 'Generate Image'}
+          {loading ? 'Generating Image...' : 'Generate Image'}
         </Button>
 
         {imageUrl && (
-          <div className="mt-4">
+          <div className="mt-4 space-y-2">
             <img src={imageUrl} alt="Generated" className="rounded-xl shadow" />
+            <Button onClick={handleVideoGenerate} disabled={videoLoading}>
+              {videoLoading ? 'Generating Video...' : 'Generate Video'}
+            </Button>
+          </div>
+        )}
+
+        {videoUrl && (
+          <div className="mt-4">
+            <video controls className="rounded-xl shadow max-w-full">
+              <source src={videoUrl} type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
           </div>
         )}
       </CardContent>
