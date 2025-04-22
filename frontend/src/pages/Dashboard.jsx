@@ -186,17 +186,14 @@
 //     </div>
 //   );
 // }
-
 import { useEffect, useState } from 'react'
 import axios from 'axios'
-import FilterDropdown from "@/components/FilterDropdown";
-
+import FilterDropdown from "@/components/FilterDropdown"
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-
-import CreatePostModal from '@/components/CreatePostModal'
+import ImageGenerator from '@/components/ImageGenerator'
 
 export default function Dashboard() {
   const [notes, setNotes] = useState([])
@@ -243,6 +240,7 @@ export default function Dashboard() {
       setContent('')
       setTag('')
       setEditingNoteId(null)
+      setSelectedNote(null)
       fetchNotes()
     } catch (err) {
       console.error('Error saving note:', err)
@@ -256,6 +254,7 @@ export default function Dashboard() {
     setTitle(note.title)
     setContent(note.content)
     setTag(note.tag || '')
+    setSelectedNote(note)
   }
 
   const handleDeleteNote = async (id) => {
@@ -264,6 +263,7 @@ export default function Dashboard() {
         headers: { Authorization: `Bearer ${token}` }
       })
       fetchNotes()
+      if (selectedNote?._id === id) setSelectedNote(null)
     } catch (err) {
       console.error('Error deleting note:', err)
     }
@@ -274,25 +274,13 @@ export default function Dashboard() {
   }, [])
 
   return (
-    <div className="max-w-2xl mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Dashboard</h1>
+    <div className="max-w-3xl mx-auto p-4 space-y-6">
+      <h1 className="text-2xl font-bold">Dashboard</h1>
 
-      <div className="bg-white p-4 rounded-2xl shadow mb-6 space-y-2">
-        <Input
-          placeholder="Note title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-        />
-        <Textarea
-          placeholder="Note content"
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-        />
-        <Input
-          placeholder="Tag (optional)"
-          value={tag}
-          onChange={(e) => setTag(e.target.value)}
-        />
+      <div className="bg-white p-4 rounded-2xl shadow space-y-2">
+        <Input placeholder="Note title" value={title} onChange={(e) => setTitle(e.target.value)} />
+        <Textarea placeholder="Note content" value={content} onChange={(e) => setContent(e.target.value)} />
+        <Input placeholder="Tag (optional)" value={tag} onChange={(e) => setTag(e.target.value)} />
         <Button onClick={handleCreateOrUpdate} disabled={loading}>
           {editingNoteId ? 'Update Note' : 'Add Note'}
         </Button>
@@ -303,12 +291,10 @@ export default function Dashboard() {
           <Card key={note._id}>
             <CardContent className="p-4">
               <div className="flex justify-between items-start">
-                <div>
+                <div onClick={() => setSelectedNote(note)} className="cursor-pointer">
                   <h2 className="text-lg font-semibold">{note.title}</h2>
                   <p className="text-gray-600 mb-1">{note.content}</p>
-                  {note.tag && (
-                    <span className="text-xs bg-gray-200 rounded px-2 py-1">{note.tag}</span>
-                  )}
+                  {note.tag && <span className="text-xs bg-gray-200 rounded px-2 py-1">{note.tag}</span>}
                 </div>
                 <div className="flex flex-col gap-2">
                   <Button variant="secondary" size="sm" onClick={() => handleEditNote(note)}>
@@ -317,9 +303,6 @@ export default function Dashboard() {
                   <Button variant="destructive" size="sm" onClick={() => handleDeleteNote(note._id)}>
                     Delete
                   </Button>
-                  <Button variant="outline" size="sm" onClick={() => setSelectedNote(note)}>
-                    Create Post
-                  </Button>
                 </div>
               </div>
             </CardContent>
@@ -327,15 +310,13 @@ export default function Dashboard() {
         ))}
       </div>
 
+      {/* Show AI Generator for selected note */}
       {selectedNote && (
-        <CreatePostModal
-          note={selectedNote}
-          open={!!selectedNote}
-          onClose={() => setSelectedNote(null)}
-        />
+        <div className="pt-6">
+          <h2 className="text-xl font-semibold mb-2">Generate Media for: {selectedNote.title}</h2>
+          <ImageGenerator defaultPrompt={selectedNote.title + ' ' + selectedNote.content} />
+        </div>
       )}
     </div>
   )
 }
-
-
