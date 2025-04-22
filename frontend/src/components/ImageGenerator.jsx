@@ -263,3 +263,5 @@ export default function ImageGenerator() {
 }
 export default function ImageGenerator({ defaultPrompt = '' }) {
     const [prompt, setPrompt] = useState(defaultPrompt)}
+
+    

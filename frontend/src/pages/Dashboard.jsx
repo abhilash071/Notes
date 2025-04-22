@@ -194,6 +194,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import ImageGenerator from '@/components/ImageGenerator'
+import InstagramPostCreator from '@/components/InstagramPostCreator'
 
 export default function Dashboard() {
   const [notes, setNotes] = useState([])
@@ -315,6 +316,9 @@ export default function Dashboard() {
         <div className="pt-6">
           <h2 className="text-xl font-semibold mb-2">Generate Media for: {selectedNote.title}</h2>
           <ImageGenerator defaultPrompt={selectedNote.title + ' ' + selectedNote.content} />
+          
+// Inside your dashboard or any other component
+<InstagramPostCreator />
         </div>
       )}
     </div>
