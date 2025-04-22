@@ -186,6 +186,7 @@
 //     </div>
 //   );
 // }
+
 import { useEffect, useState } from 'react'
 import axios from 'axios'
 import FilterDropdown from "@/components/FilterDropdown";
@@ -195,6 +196,8 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 
+import CreatePostModal from '@/components/CreatePostModal'
+
 export default function Dashboard() {
   const [notes, setNotes] = useState([])
   const [title, setTitle] = useState('')
@@ -202,6 +205,7 @@ export default function Dashboard() {
   const [editingNoteId, setEditingNoteId] = useState(null)
   const [loading, setLoading] = useState(false)
   const [tag, setTag] = useState('')
+  const [selectedNote, setSelectedNote] = useState(null)
 
   const token = localStorage.getItem('token')
 
@@ -302,7 +306,9 @@ export default function Dashboard() {
                 <div>
                   <h2 className="text-lg font-semibold">{note.title}</h2>
                   <p className="text-gray-600 mb-1">{note.content}</p>
-                  {note.tag && <span className="text-xs bg-gray-200 rounded px-2 py-1">{note.tag}</span>}
+                  {note.tag && (
+                    <span className="text-xs bg-gray-200 rounded px-2 py-1">{note.tag}</span>
+                  )}
                 </div>
                 <div className="flex flex-col gap-2">
                   <Button variant="secondary" size="sm" onClick={() => handleEditNote(note)}>
@@ -311,31 +317,25 @@ export default function Dashboard() {
                   <Button variant="destructive" size="sm" onClick={() => handleDeleteNote(note._id)}>
                     Delete
                   </Button>
+                  <Button variant="outline" size="sm" onClick={() => setSelectedNote(note)}>
+                    Create Post
+                  </Button>
                 </div>
               </div>
             </CardContent>
           </Card>
         ))}
       </div>
+
+      {selectedNote && (
+        <CreatePostModal
+          note={selectedNote}
+          open={!!selectedNote}
+          onClose={() => setSelectedNote(null)}
+        />
+      )}
     </div>
   )
 }
-{/* <div className="max-w-4xl mx-auto mt-6 px-4">
-<div className="flex justify-between items-center mb-4">
-  <h1 className="text-2xl font-bold">Your Notes</h1>
-  <FilterDropdown notes={notes} selectedTag={tag} onChange={setTag} />
-</div>
 
-<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-  {filtered.map(note => (
-    <div key={note._id} className="p-4 rounded-2xl shadow bg-white">
-      <h2 className="text-xl font-semibold">{note.title}</h2>
-      <p className="text-sm text-gray-600 mt-1">{note.tag}</p>
-      <p className="mt-2">{note.content}</p>
-    </div>
-  ))}
-</div>
-</div>
-);
-} */}
 
