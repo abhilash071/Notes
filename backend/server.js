@@ -1,22 +1,20 @@
-require('dotenv').config();  // Load environment variables from .env
-
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const authRoutes = require('./routes/auth');
+const notesRoutes = require('./routes/notes');  // Import notes routes
+const translateRoutes = require('./routes/translate');
 
 const app = express();
-const PORT = process.env.PORT || 5000;  // Default to 5000 if not defined
+const PORT = process.env.PORT || 5000;
 
-// Middleware
 app.use(cors());
 app.use(express.json());
 
-// Routes
 app.use('/api/auth', authRoutes);
-
-// MongoDB connection
-mongoose.connect('mongodb://127.0.0.1:27017/notesdb')  // Make sure the DB name is correct
+app.use('/api/notes', notesRoutes);  // Use notes routes
+app.use('/api/translate', translateRoutes);
+mongoose.connect('mongodb://127.0.0.1:27017/notesdb')
   .then(() => {
     console.log('Connected to MongoDB');
     app.listen(PORT, () => {
@@ -26,4 +24,5 @@ mongoose.connect('mongodb://127.0.0.1:27017/notesdb')  // Make sure the DB name 
   .catch(err => {
     console.error('MongoDB connection error:', err);
   });
+
 
