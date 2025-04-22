@@ -1,5 +1,3 @@
-// /frontend/components/src/ImageGenerator.jsx
-
 // /frontend/components/ImageGenerator.jsx
 
 import { useState } from 'react'
@@ -22,38 +20,27 @@ export default function ImageGenerator() {
   const [loading, setLoading] = useState(false)
   const [imageUrl, setImageUrl] = useState('')
   const [videoUrl, setVideoUrl] = useState('')
-  const [videoLoading, setVideoLoading] = useState(false)
 
   const handleGenerate = async () => {
     if (!prompt) return
     setLoading(true)
     try {
-      const res = await axios.post('http://localhost:5000/api/images/generate', { prompt, style })
-      setImageUrl(res.data.image)
+      const imageRes = await axios.post('http://localhost:5000/api/images/generate', { prompt, style })
+      setImageUrl(imageRes.data.image)
+
+      const videoRes = await axios.post('http://localhost:5000/api/video/generate', { prompt, style })
+      setVideoUrl(videoRes.data.video)
     } catch (err) {
-      console.error('Error generating image:', err)
+      console.error('Error generating media:', err)
     } finally {
       setLoading(false)
-    }
-  }
-
-  const handleVideoGenerate = async () => {
-    if (!imageUrl || !prompt) return
-    setVideoLoading(true)
-    try {
-      const res = await axios.post('http://localhost:5000/api/video/generate', { prompt, image: imageUrl })
-      setVideoUrl(res.data.video)
-    } catch (err) {
-      console.error('Error generating video:', err)
-    } finally {
-      setVideoLoading(false)
     }
   }
 
   return (
     <Card className="mt-6">
       <CardContent className="p-4 space-y-4">
-        <h2 className="text-lg font-bold">AI Image & Video Generator</h2>
+        <h2 className="text-lg font-bold">AI Image + Video Generator</h2>
 
         <div className="space-y-2">
           <Label>Prompt</Label>
@@ -73,21 +60,20 @@ export default function ImageGenerator() {
         </div>
 
         <Button onClick={handleGenerate} disabled={loading}>
-          {loading ? 'Generating Image...' : 'Generate Image'}
+          {loading ? 'Generating...' : 'Generate Media'}
         </Button>
 
         {imageUrl && (
-          <div className="mt-4 space-y-2">
+          <div className="mt-4">
+            <Label>Generated Image</Label>
             <img src={imageUrl} alt="Generated" className="rounded-xl shadow" />
-            <Button onClick={handleVideoGenerate} disabled={videoLoading}>
-              {videoLoading ? 'Generating Video...' : 'Generate Video'}
-            </Button>
           </div>
         )}
 
         {videoUrl && (
           <div className="mt-4">
-            <video controls className="rounded-xl shadow max-w-full">
+            <Label>Generated Video</Label>
+            <video controls className="rounded-xl shadow w-full">
               <source src={videoUrl} type="video/mp4" />
               Your browser does not support the video tag.
             </video>
